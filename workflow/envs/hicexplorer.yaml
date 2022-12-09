@@ -1,0 +1,7 @@
+name: hicexplorer
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - hicexplorer
+  - hic2cool

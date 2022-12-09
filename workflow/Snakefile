@@ -1,0 +1,59 @@
+# Define a dictionary of wildcard values for each combination of input files
+combinations = {
+	"fused_ABDF": ["fused_ABDF_DIVA.dedup","fused_ABDF_OHT.dedup"]
+}
+
+
+wildcard_constraints:
+    window="[0-9]+"
+
+
+
+
+ruleorder: convert_to_h5 > transform_matrix > compare_matrices > convert_to_cool > run_custom_script
+
+rule all:
+	input:expand("{sample}_differential_eigenvector_track_cis_E1_{window}.bedGraph", sample = combinations.keys(),window = config["window"])
+
+
+
+rule convert_to_h5:
+	input: "{prefix}.mcool"
+	output: temp("{prefix}_{window}.h5")
+	params:window = "{window}"
+	conda: "envs/hicexplorer.yaml"
+	shell: "hicConvertFormat -m {input}::/resolutions/{params.window} --inputFormat cool --outputFormat h5 -o {output} --correction_name KR"
+
+rule transform_matrix:
+	input: "{prefix}_{window}.h5"
+	output: temp("{prefix}_{window}.oe.h5")
+	conda: "envs/hicexplorer.yaml"
+	shell: "hicTransform --matrix {input} --outFileName {output} -me obs_exp_lieberman"
+
+
+def GetInputFiles(wildcard):
+	return(["{0}_{1}.oe.h5".format(onefile,wildcard.window) for onefile in combinations[wildcard.prefix]])
+
+rule compare_matrices:
+	input: GetInputFiles
+	output: temp("{prefix}_{window}.ratio.oe.h5")
+	conda: "envs/hicexplorer.yaml"
+	shell: "hicCompareMatrices --matrices {input} --outFileName {output} --operation log2ratio"
+
+rule convert_to_cool:
+	input: "{prefix}_{window}.ratio.oe.h5"
+	output: temp("{prefix}_{window}.ratio.oe.cool")
+	conda: "envs/hicexplorer.yaml"
+	shell: "hicConvertFormat -m {input} --inputFormat h5 --outputFormat cool -o {output}"
+
+
+rule run_custom_script:
+	input: "{prefix}_{window}.ratio.oe.cool"
+	output: ["{prefix}_differential_eigenvector_track_cis_E1_{window}.bedGraph", "{prefix}_differential_eigenvector_track_trans_E1_{window}.bedGraph"]
+	conda: "envs/pca.yaml"
+	script: "scripts/process_pca_compD.py"
+
+
+
+
+
