@@ -50,8 +50,6 @@ my_chrs = clr.chromnames
 results = map(functools.partial(make_pca_diff,clr), my_chrs)
 results = list(results)
 results = pd.concat(results)
-# for manip A only
-results["chrom"] = "chr"+results["chrom"].astype('string')
 
 # Write the output to the file specified by the second command-line argument
 results.to_csv(snakemake.output[0],index=False,header=False,sep='\t')
