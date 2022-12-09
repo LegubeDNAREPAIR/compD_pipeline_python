@@ -29,7 +29,7 @@ def make_pca_diff(clr,my_chrs = "chr17"):
 
 def make_pca_diff_trans(clr):
     bins = clr.bins()[0:len(clr.bins())]
-    C = clr.matrix(balance=False)[lo:hi, lo:hi]
+    C = clr.matrix(balance=False)[0:len(clr.bins()), 0:len(clr.bins())]
     C = np.nan_to_num(C)
     # Finally, use PCA to reduce the dimensionality of the data
     pca = PCA(n_components=1)
