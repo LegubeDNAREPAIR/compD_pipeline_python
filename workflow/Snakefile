@@ -1,6 +1,6 @@
 # Define a dictionary of wildcard values for each combination of input files
 combinations = {
-	"fused_ABDF": ["fused_ABDF_DIVA.dedup","fused_ABDF_OHT.dedup"]
+	"fused_ABDF": ["fused_ABDF_OHT.dedup","fused_ABDF_DIVA.dedup"]
 }
 
 
